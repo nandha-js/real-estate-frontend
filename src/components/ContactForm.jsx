@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { FaPaperPlane, FaUser, FaEnvelope, FaPhone, FaComment } from 'react-icons/fa'
+import {
+  FaPaperPlane, FaUser, FaEnvelope, FaPhone, FaComment
+} from 'react-icons/fa'
+import toast from 'react-hot-toast'
 
 const ContactForm = ({ propertyId, agentId }) => {
   const [formData, setFormData] = useState({
@@ -9,20 +12,39 @@ const ContactForm = ({ propertyId, agentId }) => {
     message: ''
   })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Here you would typically send the form data to your backend
-    console.log('Form submitted:', { ...formData, propertyId, agentId })
-    setSubmitted(true)
+    setLoading(true)
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/inquiries`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ...formData, propertyId, agentId })
+      })
+
+      if (!res.ok) throw new Error('Failed to send message.')
+
+      setSubmitted(true)
+      toast.success('Inquiry sent successfully!')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to send message. Please try again later.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -36,7 +58,8 @@ const ContactForm = ({ propertyId, agentId }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-xl font-bold mb-4">Contact Agent</h3>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
+        {/* Name */}
         <div className="mb-4">
           <label htmlFor="name" className="block text-gray-700 mb-2">Name</label>
           <div className="relative">
@@ -53,6 +76,7 @@ const ContactForm = ({ propertyId, agentId }) => {
           </div>
         </div>
 
+        {/* Email */}
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-700 mb-2">Email</label>
           <div className="relative">
@@ -69,6 +93,7 @@ const ContactForm = ({ propertyId, agentId }) => {
           </div>
         </div>
 
+        {/* Phone */}
         <div className="mb-4">
           <label htmlFor="phone" className="block text-gray-700 mb-2">Phone (optional)</label>
           <div className="relative">
@@ -84,6 +109,7 @@ const ContactForm = ({ propertyId, agentId }) => {
           </div>
         </div>
 
+        {/* Message */}
         <div className="mb-4">
           <label htmlFor="message" className="block text-gray-700 mb-2">Message</label>
           <div className="relative">
@@ -102,10 +128,11 @@ const ContactForm = ({ propertyId, agentId }) => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50"
         >
           <FaPaperPlane className="mr-2" />
-          Send Message
+          {loading ? 'Sending...' : 'Send Message'}
         </button>
       </form>
     </div>

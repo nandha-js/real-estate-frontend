@@ -8,7 +8,7 @@ import {
 const AuthContext = createContext();
 
 /**
- * AuthProvider manages global authentication state and actions
+ * AuthProvider manages global authentication state and actions.
  */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -17,9 +17,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const userData = await getCurrentUser(); // optional: decode token instead
-        setUser(userData);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setUser(null);
+        } else {
+          const userData = await getCurrentUser(); // can also decode token here
+          setUser(userData);
+        }
       } catch (error) {
+        console.error('Failed to fetch current user:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -33,6 +39,7 @@ export const AuthProvider = ({ children }) => {
       const data = await loginService(credentials);
       localStorage.setItem('token', data.token);
       setUser(data.user);
+      return data;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -41,28 +48,26 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await logoutService();
+      await logoutService(); // optional: just clear token if logout API not used
     } catch (error) {
-      console.warn('Logout service error:', error);
+      console.warn('Logout error (ignored):', error);
     } finally {
       localStorage.removeItem('token');
       setUser(null);
     }
   };
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = Boolean(user);
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, isAuthenticated, login, logout }}
-    >
-      {children}
+    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 /**
- * Custom hook to access the Auth context
+ * useAuth - Custom hook to consume AuthContext
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

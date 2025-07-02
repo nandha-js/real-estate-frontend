@@ -7,7 +7,7 @@ import MapView from '../components/MapView';
 
 const PropertyList = () => {
   const location = useLocation();
-  const { properties, fetchProperties, loading } = useProperty();
+  const { properties = [], fetchProperties, loading } = useProperty();
   const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
@@ -23,6 +23,8 @@ const PropertyList = () => {
     fetchProperties(filters);
   }, [location.search, fetchProperties]);
 
+  const hasProperties = properties.length > 0;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -35,18 +37,25 @@ const PropertyList = () => {
         <div className="md:w-2/3 lg:w-3/4">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">
-              {properties.length} Properties Found
+              {loading ? 'Loading...' : `${properties.length} Properties Found`}
             </h2>
-            <button
-              onClick={() => setShowMap(!showMap)}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              {showMap ? 'Show List' : 'Show Map'}
-            </button>
+            {hasProperties && (
+              <button
+                onClick={() => setShowMap(!showMap)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                {showMap ? 'Show List' : 'Show Map'}
+              </button>
+            )}
           </div>
 
+          {/* Loading State */}
           {loading ? (
-            <div>Loading properties...</div>
+            <div className="text-center py-12 text-gray-600">Loading properties...</div>
+          ) : !hasProperties ? (
+            <div className="text-center py-12 text-gray-500">
+              No properties found matching your criteria.
+            </div>
           ) : showMap ? (
             <div className="h-[600px] mb-8">
               <MapView

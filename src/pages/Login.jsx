@@ -18,9 +18,19 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    const trimmedEmail = formData.email.trim();
+    const trimmedPassword = formData.password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      setError('Both fields are required.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      await login(formData);
-      navigate('/'); // or '/dashboard' if role-based
+      await login({ email: trimmedEmail, password: trimmedPassword });
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -41,7 +51,7 @@ const Login = () => {
           </div>
         )}
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
@@ -49,12 +59,14 @@ const Login = () => {
             <div className="relative mt-1">
               <FaUser className="absolute top-2.5 left-3 text-gray-400" />
               <input
+                id="email"
                 type="email"
                 name="email"
+                autoComplete="email"
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
                 value={formData.email}
                 onChange={handleChange}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
             </div>
           </div>
@@ -66,20 +78,25 @@ const Login = () => {
             <div className="relative mt-1">
               <FaLock className="absolute top-2.5 left-3 text-gray-400" />
               <input
+                id="password"
                 type="password"
                 name="password"
+                autoComplete="current-password"
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
                 value={formData.password}
                 onChange={handleChange}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm"
+            disabled={loading || !formData.email || !formData.password}
+            className={`w-full flex items-center justify-center py-2 px-4 rounded-md text-sm font-semibold transition 
+              ${loading || !formData.email || !formData.password
+                ? 'bg-blue-300 cursor-not-allowed text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
           >
             <FaSignInAlt className="mr-2" />
             {loading ? 'Signing in...' : 'Sign in'}

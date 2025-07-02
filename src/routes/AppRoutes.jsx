@@ -6,7 +6,7 @@ import UserLayout from '../layouts/UserLayout';
 import AgentLayout from '../layouts/AgentLayout';
 import AdminLayout from '../layouts/AdminLayout';
 
-// Lazy load pages
+// Lazy load all pages
 const Home = lazy(() => import('../pages/Home'));
 const PropertyList = lazy(() => import('../pages/PropertyList'));
 const PropertyDetails = lazy(() => import('../pages/PropertyDetails'));
@@ -20,16 +20,14 @@ const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 /**
- * Private route wrapper for role-based protection
+ * Role-protected route
  */
 const PrivateRoute = ({ children, roles = [] }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
-
+  if (loading) return <div className="text-center py-12">Loading...</div>;
   if (!user) return <Navigate to="/login" />;
-
-  if (roles.length && !roles.includes(user.role)) {
+  if (roles.length > 0 && !roles.includes(user.role)) {
     return <Navigate to="/unauthorized" />;
   }
 
@@ -40,7 +38,7 @@ const AppRoutes = () => {
   const { user } = useAuth();
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="text-center py-12">Loading...</div>}>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<UserLayout><Home /></UserLayout>} />
@@ -50,11 +48,11 @@ const AppRoutes = () => {
         <Route path="/agents/:id" element={<UserLayout><AgentProfile /></UserLayout>} />
         <Route path="/compare" element={<UserLayout><CompareProperties /></UserLayout>} />
 
-        {/* Auth */}
+        {/* Auth Routes */}
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
 
-        {/* Agent Dashboard */}
+        {/* Protected Routes */}
         <Route
           path="/agent/dashboard"
           element={
@@ -63,8 +61,6 @@ const AppRoutes = () => {
             </PrivateRoute>
           }
         />
-
-        {/* Admin Dashboard */}
         <Route
           path="/admin/dashboard"
           element={
@@ -74,7 +70,7 @@ const AppRoutes = () => {
           }
         />
 
-        {/* Fallback */}
+        {/* Catch-all for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

@@ -1,10 +1,13 @@
-
 @import "tailwindcss";
+
 /* ------------------------ */
 /* 🌐 Global Styles         */
 /* ------------------------ */
 body {
   font-family: 'Inter', sans-serif;
+  background-color: #f9f9f9; /* Soft default background */
+  color: #1f2937; /* Gray-800 */
+  scroll-behavior: smooth;
 }
 
 /* ------------------------ */
@@ -13,20 +16,25 @@ body {
 .leaflet-container {
   width: 100%;
   height: 100%;
-  z-index: 0; /* Ensure proper layering */
+  z-index: 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
 /* ------------------------ */
-/* 🏠 Property Card Styles   */
+/* 🏠 Property Card Styles  */
 /* ------------------------ */
 .property-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   cursor: pointer;
+  background-color: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
 .property-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.08);
 }
 
 /* ------------------------ */

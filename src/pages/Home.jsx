@@ -2,13 +2,14 @@ import { useEffect } from 'react'
 import { useProperty } from '../context/PropertyContext'
 import PropertyCard from '../components/PropertyCard'
 import SearchFilter from '../components/SearchFilter'
+import { Link } from 'react-router-dom'
 import { FaSearch, FaHome, FaMapMarkerAlt, FaStar, FaHeart } from 'react-icons/fa'
 
 const Home = () => {
-  const { properties, fetchProperties } = useProperty()
+  const { properties, fetchProperties, loading } = useProperty()
 
   useEffect(() => {
-    fetchProperties({ limit: 6 })
+    fetchProperties({ limit: 6 }) // Fetch top 6 featured
   }, [fetchProperties])
 
   return (
@@ -25,14 +26,18 @@ const Home = () => {
               Discover thousands of properties, from cozy apartments to luxurious villas
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 md:py-4 md:text-lg md:px-10 transition-all duration-300 transform hover:scale-105">
-                <FaSearch className="mr-2" />
-                Browse Properties
-              </button>
-              <button className="flex items-center justify-center px-8 py-4 border border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-white hover:bg-opacity-10 md:py-4 md:text-lg md:px-10 transition-all duration-300">
-                <FaMapMarkerAlt className="mr-2" />
-                Explore Areas
-              </button>
+              <Link to="/properties">
+                <button className="flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-all duration-300 transform hover:scale-105">
+                  <FaSearch className="mr-2" />
+                  Browse Properties
+                </button>
+              </Link>
+              <Link to="/areas">
+                <button className="flex items-center justify-center px-8 py-4 border border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                  <FaMapMarkerAlt className="mr-2" />
+                  Explore Areas
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -49,55 +54,66 @@ const Home = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.slice(0, 6).map(property => (
-            <div key={property.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <div className="relative h-60 overflow-hidden">
-                <img 
-                  src={property.images[0] || '/placeholder-property.jpg'} 
-                  alt={property.title} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-                <div className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md">
-                  <FaHeart className="text-gray-400 hover:text-red-500 cursor-pointer" />
+        {loading ? (
+          <p className="text-center text-gray-500 text-lg">Loading featured properties...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {properties.map((property) => (
+              <div
+                key={property._id}
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              >
+                <div className="relative h-60 overflow-hidden">
+                  <img
+                    src={property.images?.[0] || '/placeholder-property.jpg'}
+                    alt={property.title}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  />
+                  <div className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md">
+                    <FaHeart className="text-gray-400 hover:text-red-500 cursor-pointer" />
+                  </div>
+                  <div className="absolute bottom-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold">
+                    {property.type || 'Residential'}
+                  </div>
                 </div>
-                <div className="absolute bottom-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold">
-                  {property.type}
+                <div className="p-6">
+                  <div className="flex items-center text-blue-600 mb-1">
+                    <FaStar className="mr-1" />
+                    <span className="font-medium">{property.rating || 'New'}</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 hover:text-blue-600 transition-colors">
+                    {property.title}
+                  </h3>
+                  <div className="flex items-center text-gray-600 mb-4">
+                    <FaMapMarkerAlt className="mr-2 text-blue-500" />
+                    <span>{typeof property.location === 'string' ? property.location : property.address}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold text-blue-800">
+                      ${property.price?.toLocaleString() || 'N/A'}
+                    </span>
+                    <Link to={`/properties/${property._id}`}>
+                      <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        View Details
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </div>
-              <div className="p-6">
-                <div className="flex items-center text-blue-600 mb-1">
-                  <FaStar className="mr-1" />
-                  <span className="font-medium">{property.rating || 'New'}</span>
-                </div>
-                <h3 className="text-xl font-bold mb-2 hover:text-blue-600 transition-colors">
-                  {property.title}
-                </h3>
-                <div className="flex items-center text-gray-600 mb-4">
-                  <FaMapMarkerAlt className="mr-2 text-blue-500" />
-                  <span>{property.location}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-blue-800">
-                    ${property.price.toLocaleString()}
-                  </span>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="mt-12 text-center">
-          <button className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-            View All Properties
-          </button>
+          <Link to="/properties">
+            <button className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+              View All Properties
+            </button>
+          </Link>
         </div>
       </div>
 
-      {/* Search Section */}
+      {/* Search Filter */}
       <div className="bg-gray-100 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

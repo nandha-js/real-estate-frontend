@@ -51,26 +51,28 @@ const ContactAgent = () => {
                 className="w-32 h-32 rounded-full object-cover mb-4 border-4 border-blue-100"
               />
               <h1 className="text-2xl font-bold text-center">{agent.name}</h1>
-              <p className="text-gray-600 text-center">{agent.title}</p>
-              <p className="text-gray-600 text-center">{agent.company}</p>
+              <p className="text-gray-600 text-center">{agent.title || 'Agent'}</p>
+              <p className="text-gray-600 text-center">{agent.company || 'Real Estate Co.'}</p>
             </div>
 
             <div className="mb-6">
               <div className="flex items-center justify-center mb-3">
                 <FaStar className="text-yellow-400 mr-1" />
-                <span className="font-semibold">{agent.rating}</span>
-                <span className="text-gray-500 ml-1">({agent.reviews} reviews)</span>
+                <span className="font-semibold">{agent.rating || 0}</span>
+                <span className="text-gray-500 ml-1">({agent.reviews || 0} reviews)</span>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center">
                   <FaUser className="text-gray-500 mr-3" />
-                  <span>{agent.experience} years experience</span>
+                  <span>{agent.experience || 0} years experience</span>
                 </div>
                 
                 <div className="flex items-center">
                   <FaHome className="text-gray-500 mr-3" />
-                  <span>Specializes in: {agent.specializations.join(', ')}</span>
+                  <span>
+                    Specializes in: {agent.specializations?.join(', ') || 'N/A'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -78,12 +80,12 @@ const ContactAgent = () => {
             <div className="space-y-4">
               <div className="flex items-center">
                 <FaPhone className="text-gray-500 mr-3" />
-                <span>{agent.phone}</span>
+                <span>{agent.phone || 'Not available'}</span>
               </div>
               
               <div className="flex items-center">
                 <FaEnvelope className="text-gray-500 mr-3" />
-                <span>{agent.email}</span>
+                <span>{agent.email || 'Not available'}</span>
               </div>
             </div>
           </div>
@@ -96,23 +98,27 @@ const ContactAgent = () => {
               Fill out the form below to send a message to {agent.name}. They will get back to you as soon as possible.
             </p>
 
-            <ContactForm agentId={agent.id} />
+            {agent.id && <ContactForm agentId={agent.id} />}
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-bold mb-4">About {agent.name}</h3>
-            <p className="text-gray-700 mb-4">{agent.bio}</p>
+            <p className="text-gray-700 mb-4">{agent.bio || 'No biography available.'}</p>
             
             <h4 className="font-bold mb-2">Areas Served:</h4>
             <div className="flex flex-wrap gap-2 mb-4">
-              {agent.areasServed.map((area, index) => (
-                <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
-                  {area}
-                </span>
-              ))}
+              {agent.areasServed?.length > 0 ? (
+                agent.areasServed.map((area, index) => (
+                  <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                    {area}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-500">No areas listed.</span>
+              )}
             </div>
 
-            {user && user.role === 'agent' && (
+            {user?.role === 'agent' && (
               <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h4 className="font-bold text-blue-800 mb-2">Agent Notes</h4>
                 <p className="text-blue-700">
